@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/shaunmza/tradeqwik"
 	"github.com/shaunmza/tradeqwik/ticker"
@@ -37,7 +36,7 @@ func main() {
 				movement = " \033[31mv\033[0m "
 			}
 
-			fmt.Println(movement + " " + strconv.FormatFloat(pair.Last, 'f', 8, 64) + " " + pair.Base + "/" + pair.Counter)
+			fmt.Printf("%s %f %s/%s\n", movement, pair.Last, pair.Base, pair.Counter)
 		}
 		fmt.Println("=======================================================")
 	}
