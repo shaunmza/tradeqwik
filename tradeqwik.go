@@ -45,7 +45,7 @@ type RecentTrades struct {
 
 type RecentTrade struct {
 	Type    string  `json:"typ"`
-	Amount  string  `json:"amount,string"`
+	Amount  float64 `json:"amount,string"`
 	Price   float64 `json:"price,string"`
 	Fee     float64 `json:"fee,string"`
 	Created int64   `json:"created"`

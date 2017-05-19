@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/shaunmza/tradeqwik"
@@ -15,63 +14,52 @@ var rChan chan *tradeqwik.RecentTrades
 var oChan chan *tradeqwik.OpenTrades
 
 func main() {
-	//var r *tradeqwik.RecentTrades
+	var r *tradeqwik.RecentTrades
 	var o *tradeqwik.OpenTrades
 
 	// Initialse, so we can get the channel to receive updates from
 	rChan = make(chan *tradeqwik.RecentTrades)
 	oChan = make(chan *tradeqwik.OpenTrades)
 
-	//trades.WatchRecentTrades("VIVA", "BTC")
+	watchRecentTrades("VIVA", "BTC")
 	watchOpenTrades("VIVA", "BTC")
 	watchOpenTrades("VIVA", "USD")
 	watchOpenTrades("VIVA", "LTC")
 
 	for {
-		o = <-oChan
-
-		if o.Error != nil {
-			fmt.Printf("Open Trade Error! %s, Last Updated: %s\n", o.Error, o.LastUpdate)
-		}
-
-		// Just print it out for now
-		for _, ask := range o.Asks {
-
-			fmt.Println(o.Base + "/" + o.Counter + " " + strconv.FormatFloat(ask.Amount, 'f', 8, 64) + " " + strconv.FormatFloat(ask.Price, 'f', 8, 64))
-		}
-		fmt.Println("----------------------------------------")
-
-		for _, bid := range o.Bids {
-
-			fmt.Println(o.Base + "/" + o.Counter + " " + strconv.FormatFloat(bid.Amount, 'f', 8, 64) + " " + strconv.FormatFloat(bid.Price, 'f', 8, 64))
-		}
-		fmt.Println("----------------------------------------")
-	}
-	/*
-		go func() {
-			// Infinite loop so we keep getting ticker info
-			for {
-
-				// Get off of the channel
-				r = <-rChan
-
-				// If this is not nil then we encountered a problem, use this to determine
-				// what to do next.
-				// LastUpdate can be used to determine how stale the data is
-				if r.Error != nil {
-					fmt.Printf("Recent Trades Error! %s, Last Updated: %s\n", r.Error, r.LastUpdate)
-				}
-
-				// Just print it out for now
-				for _, trade := range r.Trades {
-
-					fmt.Println(r.Base + "/" + r.Counter + "/" + trade.Amount + " " + trade.Price + " " + trade.Type)
-				}
-				fmt.Println("=======================================================")
-
+		select {
+		case o = <-oChan:
+			fmt.Println("Asks:")
+			if o.Error != nil {
+				fmt.Printf("Open Trade Error! %s, Last Updated: %s\n", o.Error, o.LastUpdate)
 			}
-		}()
-	*/
+
+			// Just print it out for now
+			for _, ask := range o.Asks {
+				fmt.Printf("%s/%s Amount: %f Price: %f\n", o.Base, o.Counter, ask.Amount, ask.Price)
+			}
+			fmt.Println("----------------------------------------")
+
+			for _, bid := range o.Bids {
+				fmt.Printf("%s/%s Amount: %f Price: %f\n", o.Base, o.Counter, bid.Amount, bid.Price)
+			}
+			fmt.Println("----------------------------------------")
+
+		case r = <-rChan:
+			// If this is not nil then we encountered a problem, use this to determine
+			// what to do next.
+			// LastUpdate can be used to determine how stale the data is
+			if r.Error != nil {
+				fmt.Printf("Recent Trades Error! %s, Last Updated: %s\n", r.Error, r.LastUpdate)
+			}
+
+			// Just print it out for now
+			for _, trade := range r.Trades {
+				fmt.Printf("%s/%s Type: %s Amount: %f Price: %f\n", r.Base, r.Counter, trade.Type, trade.Amount, trade.Price)
+			}
+			fmt.Println("=======================================================")
+		}
+	}
 }
 
 func watchRecentTrades(base string, counter string) {
@@ -83,7 +71,7 @@ func watchRecentTrades(base string, counter string) {
 	// Call now so we don't have to wait for the first batch of data
 	go func() {
 		s, err := tradeqwik.GetRecentTrades(base, counter)
-		if err != nil {
+		if err == nil {
 			rChan <- s
 		}
 	}()
@@ -92,7 +80,7 @@ func watchRecentTrades(base string, counter string) {
 	go func() {
 		for _ = range ticker.C {
 			s, err := tradeqwik.GetRecentTrades(base, counter)
-			if err != nil {
+			if err == nil {
 				rChan <- s
 			}
 		}
@@ -108,8 +96,7 @@ func watchOpenTrades(base string, counter string) {
 	// Call now so we don't have to wait for the first batch of data
 	go func() {
 		s, err := tradeqwik.GetOpenTrades(base, counter)
-		fmt.Println(s)
-		if err != nil {
+		if err == nil {
 			oChan <- s
 		}
 	}()
@@ -118,7 +105,7 @@ func watchOpenTrades(base string, counter string) {
 	go func() {
 		for _ = range ticker.C {
 			s, err := tradeqwik.GetOpenTrades(base, counter)
-			if err != nil {
+			if err == nil {
 				oChan <- s
 			}
 		}
