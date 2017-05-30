@@ -120,45 +120,45 @@ func Cancel(orderId int64) (bool, error) {
 	return true, err
 }
 
-func GetPending() tradeqwik.AccountOpenTrades {
+func GetPending() (tradeqwik.AccountOpenTrades, error) {
 	endpoint := "/api/1/pending_trades"
 	data := key{APIKey: apiKey}
 
 	resp, err := postData(data, endpoint)
 	if err != nil {
-		return tradeqwik.AccountOpenTrades{Error: err}
+		return tradeqwik.AccountOpenTrades{}, err
 	}
 
 	s := []byte(resp)
 
 	var j []*tradeqwik.AccountOpenTrade
 	if err := json.Unmarshal(s, &j); err != nil {
-		return tradeqwik.AccountOpenTrades{Error: err}
+		return tradeqwik.AccountOpenTrades{}, err
 	}
 
 	ret := tradeqwik.AccountOpenTrades{Trades: j, LastUpdate: time.Now()}
-	return ret
+	return ret, err
 }
 
-func GetHistory(data tradeqwik.AccountHistory) tradeqwik.RecentTrades {
+func GetHistory(data tradeqwik.AccountHistory) (tradeqwik.RecentTrades, error) {
 
 	endpoint := "/api/1/trade_history"
 	data.APIKey = apiKey
 
 	resp, err := postData(data, endpoint)
 	if err != nil {
-		return tradeqwik.RecentTrades{Error: err}
+		return tradeqwik.RecentTrades{}, err
 	}
 
 	s := []byte(resp)
 
 	var j []*tradeqwik.RecentTrade
 	if err := json.Unmarshal(s, &j); err != nil {
-		return tradeqwik.RecentTrades{Error: err}
+		return tradeqwik.RecentTrades{}, err
 	}
 
 	ret := tradeqwik.RecentTrades{Trades: j, LastUpdate: time.Now()}
-	return ret
+	return ret, err
 }
 
 func postData(data interface{}, endpoint string) (string, error) {

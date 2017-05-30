@@ -58,6 +58,8 @@ type AccountOpenTrades struct {
 }
 
 type AccountOpenTrade struct {
+	Base    string
+	Counter string
 	ID      int64   `json:"id"`
 	Type    string  `json:"typ"`
 	Amount  float64 `json:"amount,string"`

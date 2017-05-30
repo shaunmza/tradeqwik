@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/shaunmza/tradeqwik"
 	"github.com/shaunmza/tradeqwik/trading"
 )
 
@@ -22,21 +23,27 @@ func main() {
 		fmt.Println(err)
 	}
 	fmt.Println(balances.Currencies["VIVA"])
-	trades := trading.GetPending()
+	trades, err := trading.GetPending()
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	for _, trade := range trades.Trades {
-		fmt.Println(strconv.FormatInt(trade.ID, 10) + " Type: " + trade.Type + " Price" + strconv.FormatFloat(trade.Price, 'f', 8, 64))
+		fmt.Printf("Base: %s Counter: %s Id: %f Type: %s Price:%f \n", trade.Base, trade.Counter, trade.ID, trade.Type, trade.Price)
 	}
 	fmt.Println("=======================================================")
-	/*hstruct := tradeqwik.AccountHistory{}
+	hstruct := tradeqwik.AccountHistory{}
 
-	history := trading.GetHistory(hstruct)
+	history, err := trading.GetHistory(hstruct)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	for _, trade := range history.Trades {
 		fmt.Println(" Type: " + trade.Type + " Price" + strconv.FormatFloat(trade.Price, 'f', 8, 64))
 	}
 	fmt.Println("=======================================================")
 
-	trading.Cancel(4959)*/
+	/*trading.Cancel(4959)*/
 
 }
