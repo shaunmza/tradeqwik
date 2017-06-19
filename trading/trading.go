@@ -192,8 +192,14 @@ func GetBalance() (Balances, error) {
 	data := key{APIKey: apiKey}
 
 	resp, err := postData(data, endpoint)
+
 	if err != nil {
 		return Balances{}, err
+	}
+
+	// Empty square braces means auth failed
+	if string(resp) == "[]" {
+		return Balances{}, errors.New("Authentication failed")
 	}
 
 	s := []byte(resp)
